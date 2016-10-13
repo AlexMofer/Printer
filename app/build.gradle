@@ -22,6 +22,7 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:24.2.1'
     compile 'com.android.support:design:24.2.1'
-    compile 'am.util:printer:1.1.3'
+//    compile 'am.util:printer:1.1.3'
+    compile project(':printer')
     compile 'com.google.zxing:core:3.3.0'
 }
