@@ -11,6 +11,7 @@ import java.util.List;
  * ESC-POS指令集
  * Created by Alex on 2015/9/22.
  */
+@SuppressWarnings("all")
 public class PrinterUtils {
 
     private static String hexStr = "0123456789ABCDEF";
@@ -716,18 +717,20 @@ public class PrinterUtils {
     /**
      * 解码图片
      *
-     * @param image 图片
+     * @param image   图片
+     * @param parting 高度分割值
      * @return 数据流
      */
     @SuppressWarnings("unused")
-    public static byte[] decodeBitmap(Bitmap image) {
+    public static ArrayList<byte[]> decodeBitmapToDataList(Bitmap image, int parting) {
+        if (parting <= 0 || parting > 255)
+            parting = 255;
         if (image == null)
             return null;
         final int width = image.getWidth();
         final int height = image.getHeight();
         if (width <= 0 || height <= 0)
             return null;
-
         if (width > 2040) {
             // 8位9针，宽度限制2040像素（但一般纸张都没法打印那么宽，但并不影响打印）
             final float scale = 2040 / (float) width;
@@ -739,7 +742,7 @@ public class PrinterUtils {
             } catch (OutOfMemoryError e) {
                 return null;
             }
-            byte[] data = decodeBitmap(resizeImage);
+            ArrayList<byte[]> data = decodeBitmapToDataList(resizeImage, parting);
             resizeImage.recycle();
             return data;
         }
@@ -763,10 +766,10 @@ public class PrinterUtils {
             }
         }
         ArrayList<String> commandList = new ArrayList<>();
-        // 高度每255像素进行一次分割
-        int time = height % 255 == 0 ? height / 255 : (height / 255 + 1);// 循环打印次数
+        // 高度每parting像素进行一次分割
+        int time = height % parting == 0 ? height / parting : (height / parting + 1);// 循环打印次数
         for (int t = 0; t < time; t++) {
-            int partHeight = t == time - 1 ? height % 255 : 255;// 分段高度
+            int partHeight = t == time - 1 ? height % parting : parting;// 分段高度
 
             // 高命令
             String heightHexString = Integer.toHexString(partHeight);
@@ -789,7 +792,7 @@ public class PrinterUtils {
                 sb.delete(0, sb.length());
                 for (int j = 0; j < width; j++) {
                     // 实际在图片中的高度
-                    int startHeight = t * 255 + i;
+                    int startHeight = t * parting + i;
                     //得到当前像素的值
                     int color = image.getPixel(j, startHeight);
                     int red, green, blue;
@@ -839,7 +842,45 @@ public class PrinterUtils {
             // 数据指令
             commandList.addAll(bmpHexList);
         }
-        return hexListToByte(commandList);
+        ArrayList<byte[]> data = new ArrayList<>();
+        for (String hexStr : commandList) {
+            data.add(hexStringToBytes(hexStr));
+        }
+        return data;
+    }
+
+    /**
+     * 解码图片
+     *
+     * @param image   图片
+     * @param parting 高度分割值
+     * @return 数据流
+     */
+    @SuppressWarnings("unused")
+    public static byte[] decodeBitmap(Bitmap image, int parting) {
+        ArrayList<byte[]> data = decodeBitmapToDataList(image, parting);
+        int len = 0;
+        for (byte[] srcArray : data) {
+            len += srcArray.length;
+        }
+        byte[] destArray = new byte[len];
+        int destLen = 0;
+        for (byte[] srcArray : data) {
+            System.arraycopy(srcArray, 0, destArray, destLen, srcArray.length);
+            destLen += srcArray.length;
+        }
+        return destArray;
+    }
+
+    /**
+     * 解码图片
+     *
+     * @param image 图片
+     * @return 数据流
+     */
+    @SuppressWarnings("unused")
+    public static byte[] decodeBitmap(Bitmap image) {
+        return decodeBitmap(image, PrinterWriter.HEIGHT_PARTING_DEFAULT);
     }
 
     /**
@@ -891,12 +932,13 @@ public class PrinterUtils {
 
     /**
      * 16进制指令list转换为byte[]指令
+     *
      * @param list 指令集
      * @return byte[]指令
      */
     @SuppressWarnings("unused")
     public static byte[] hexListToByte(List<String> list) {
-        List<byte[]> commandList = new ArrayList<>();
+        ArrayList<byte[]> commandList = new ArrayList<>();
         for (String hexStr : list) {
             commandList.add(hexStringToBytes(hexStr));
         }

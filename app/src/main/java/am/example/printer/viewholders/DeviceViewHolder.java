@@ -29,9 +29,11 @@ public class DeviceViewHolder extends RecyclerView.ViewHolder implements View.On
     public void onClick(View view) {
         if (mListener != null)
             mListener.onItemClicked(mDevice);
+        view.setSelected(true);
     }
 
-    public void setData(BluetoothDevice device) {
+    public void setData(BluetoothDevice device, boolean isSelected) {
+        itemView.setSelected(isSelected);
         mDevice = device;
         if (itemView instanceof TextView && mDevice != null) {
             TextView tvName = (TextView) itemView;

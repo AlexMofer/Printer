@@ -14,10 +14,12 @@ import am.example.printer.viewholders.DeviceViewHolder;
  * DeviceAdapter
  * Created by Alex on 2016/6/22.
  */
-public class DeviceAdapter extends RecyclerView.Adapter<DeviceViewHolder> {
+public class DeviceAdapter extends RecyclerView.Adapter<DeviceViewHolder> implements
+        DeviceViewHolder.OnHolderListener {
 
     private DeviceViewHolder.OnHolderListener listener;
     private ArrayList<BluetoothDevice> mData = new ArrayList<>();
+    private BluetoothDevice selectedDevice;
 
     public DeviceAdapter(DeviceViewHolder.OnHolderListener listener) {
         this.listener = listener;
@@ -25,17 +27,28 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceViewHolder> {
 
     @Override
     public DeviceViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new DeviceViewHolder(parent, listener);
+        return new DeviceViewHolder(parent, this);
     }
 
     @Override
     public void onBindViewHolder(DeviceViewHolder holder, int position) {
-        holder.setData(mData.get(position));
+        BluetoothDevice device = mData.get(position);
+        holder.setData(device, device == selectedDevice);
     }
 
     @Override
     public int getItemCount() {
         return mData.size();
+    }
+
+    @Override
+    public void onItemClicked(BluetoothDevice device) {
+        BluetoothDevice oldDevice = selectedDevice;
+        selectedDevice = device;
+        if (oldDevice != null && mData != null)
+            notifyItemChanged(mData.indexOf(oldDevice));
+        if (listener != null)
+            listener.onItemClicked(device);
     }
 
     public void setDevices(Set<BluetoothDevice> devices) {

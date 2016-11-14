@@ -10,6 +10,7 @@ import android.graphics.drawable.Drawable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 
 
 /**
@@ -18,31 +19,79 @@ import java.io.IOException;
  */
 public abstract class PrinterWriter {
 
+    public static final int HEIGHT_PARTING_DEFAULT = 255;
     private static final String CHARSET = "gb2312";
     private ByteArrayOutputStream bos;
+    private int heightParting;
 
     public PrinterWriter() throws IOException {
-        reset();
+        this(HEIGHT_PARTING_DEFAULT);
+    }
+
+    public PrinterWriter(int parting) throws IOException {
+        if (parting <= 0 || parting > HEIGHT_PARTING_DEFAULT)
+            heightParting = HEIGHT_PARTING_DEFAULT;
+        else
+            heightParting = parting;
+        init();
     }
 
     /**
      * 重置
+     * 使用 init 替代
      *
      * @throws IOException 异常
      */
+    @Deprecated
     public void reset() throws IOException {
+        init();
+    }
+
+    /**
+     * 初始化
+     *
+     * @throws IOException 异常
+     */
+    public void init() throws IOException {
         bos = new ByteArrayOutputStream();
         write(PrinterUtils.initPrinter());
     }
 
     /**
-     * 获取预打印数据
+     * 获取预打印数据并关闭流
      *
      * @return 预打印数据
      * @throws IOException 异常
      */
     @SuppressWarnings("unused")
+    @Deprecated
     public byte[] getData() throws IOException {
+        return getDataAndClose();
+    }
+
+    /**
+     * 获取预打印数据并重置流
+     *
+     * @return 预打印数据
+     * @throws IOException 异常
+     */
+    @SuppressWarnings("unused")
+    public byte[] getDataAndReset() throws IOException {
+        byte[] data;
+        bos.flush();
+        data = bos.toByteArray();
+        bos.reset();
+        return data;
+    }
+
+    /**
+     * 获取预打印数据并关闭流
+     *
+     * @return 预打印数据
+     * @throws IOException 异常
+     */
+    @SuppressWarnings("unused")
+    public byte[] getDataAndClose() throws IOException {
         byte[] data;
         bos.flush();
         data = bos.toByteArray();
@@ -240,12 +289,13 @@ public abstract class PrinterWriter {
      * @throws IOException 异常
      */
     @SuppressWarnings("unused")
+    @Deprecated
     public void printDrawable(Resources res, int id) throws IOException {
         int maxWidth = getDrawableMaxWidth();
         Bitmap image = scalingBitmap(res, id, maxWidth);
         if (image == null)
             return;
-        byte[] command = PrinterUtils.decodeBitmap(image);
+        byte[] command = PrinterUtils.decodeBitmap(image, heightParting);
         image.recycle();
         try {
             if (command != null) {
@@ -254,6 +304,23 @@ public abstract class PrinterWriter {
         } catch (IOException e) {
             throw new IOException(e.getMessage());
         }
+    }
+
+    /**
+     * 获取图片数据流
+     *
+     * @param res Resources
+     * @param id  资源ID
+     * @return 数据流
+     */
+    public ArrayList<byte[]> getImageByte(Resources res, int id) {
+        int maxWidth = getDrawableMaxWidth();
+        Bitmap image = scalingBitmap(res, id, maxWidth);
+        if (image == null)
+            return null;
+        ArrayList<byte[]> data = PrinterUtils.decodeBitmapToDataList(image, heightParting);
+        image.recycle();
+        return data;
     }
 
     /**
@@ -313,12 +380,13 @@ public abstract class PrinterWriter {
      * @throws IOException 异常
      */
     @SuppressWarnings("unused")
+    @Deprecated
     public void printDrawable(Drawable drawable) throws IOException {
         int maxWidth = getDrawableMaxWidth();
         Bitmap image = scalingDrawable(drawable, maxWidth);
         if (image == null)
             return;
-        byte[] command = PrinterUtils.decodeBitmap(image);
+        byte[] command = PrinterUtils.decodeBitmap(image, heightParting);
         image.recycle();
         try {
             if (command != null) {
@@ -327,6 +395,22 @@ public abstract class PrinterWriter {
         } catch (IOException e) {
             throw new IOException(e.getMessage());
         }
+    }
+
+    /**
+     * 获取图片数据流
+     *
+     * @param drawable 图片
+     * @return 数据流
+     */
+    public ArrayList<byte[]> getImageByte(Drawable drawable) {
+        int maxWidth = getDrawableMaxWidth();
+        Bitmap image = scalingDrawable(drawable, maxWidth);
+        if (image == null)
+            return null;
+        ArrayList<byte[]> data = PrinterUtils.decodeBitmapToDataList(image, heightParting);
+        image.recycle();
+        return data;
     }
 
     /**
@@ -371,12 +455,13 @@ public abstract class PrinterWriter {
      * @throws IOException 异常
      */
     @SuppressWarnings("unused")
+    @Deprecated
     public void printBitmap(Bitmap image) throws IOException {
         int maxWidth = getDrawableMaxWidth();
         Bitmap scalingImage = scalingBitmap(image, maxWidth);
         if (scalingImage == null)
             return;
-        byte[] command = PrinterUtils.decodeBitmap(scalingImage);
+        byte[] command = PrinterUtils.decodeBitmap(scalingImage, heightParting);
         scalingImage.recycle();
         try {
             if (command != null) {
@@ -385,6 +470,22 @@ public abstract class PrinterWriter {
         } catch (IOException e) {
             throw new IOException(e.getMessage());
         }
+    }
+
+    /**
+     * 获取图片数据流
+     *
+     * @param image 图片
+     * @return 数据流
+     */
+    public ArrayList<byte[]> getImageByte(Bitmap image) {
+        int maxWidth = getDrawableMaxWidth();
+        Bitmap scalingImage = scalingBitmap(image, maxWidth);
+        if (scalingImage == null)
+            return null;
+        ArrayList<byte[]> data = PrinterUtils.decodeBitmapToDataList(image, heightParting);
+        image.recycle();
+        return data;
     }
 
     /**
@@ -420,6 +521,7 @@ public abstract class PrinterWriter {
      * @throws IOException 异常
      */
     @SuppressWarnings("unused")
+    @Deprecated
     public void printImageFile(String filePath) throws IOException {
         Bitmap image;
         try {
@@ -441,6 +543,32 @@ public abstract class PrinterWriter {
         printBitmap(image);
     }
 
+    /**
+     * 获取图片数据流
+     *
+     * @param filePath 图片路径
+     * @return 数据流
+     */
+    public ArrayList<byte[]> getImageByte(String filePath) {
+        Bitmap image;
+        try {
+            int width;
+            int height;
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeFile(filePath, options);
+            width = options.outWidth;
+            height = options.outHeight;
+            if (width <= 0 || height <= 0)
+                return null;
+            options.inJustDecodeBounds = false;
+            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+            image = BitmapFactory.decodeFile(filePath, options);
+        } catch (OutOfMemoryError | Exception e) {
+            return null;
+        }
+        return getImageByte(image);
+    }
 
     /**
      * 输出并换行
@@ -470,6 +598,29 @@ public abstract class PrinterWriter {
     @SuppressWarnings("unused")
     public void feedPaperCutPartial() throws IOException {
         write(PrinterUtils.feedPaperCutPartial());
+    }
+
+    /**
+     * 设置图片打印高度分割值
+     * 最大允许255像素
+     *
+     * @param parting 高度分割值
+     */
+    @SuppressWarnings("unused")
+    public void setHeightParting(int parting) {
+        if (parting <= 0 || parting > HEIGHT_PARTING_DEFAULT)
+            return;
+        heightParting = parting;
+    }
+
+    /**
+     * 获取图片打印高度分割值
+     *
+     * @return 高度分割值
+     */
+    @SuppressWarnings("unused")
+    public int getHeightParting() {
+        return heightParting;
     }
 
     /**
