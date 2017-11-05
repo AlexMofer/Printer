@@ -3,7 +3,7 @@ Printer
 
 <img src="icon.png" alt="Icon"/>
 
-ES-POS命令打印辅助库
+ESC-POS命令打印辅助库
 
 源码地址：[ProjectX][1]
 
