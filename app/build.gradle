@@ -1,28 +1,19 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.0"
+    compileSdkVersion 27
     defaultConfig {
         applicationId "am.example.printer"
-        minSdkVersion 12
-        targetSdkVersion 25
-        versionCode 5
-        versionName "2.0"
-    }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
+        minSdkVersion 14
+        targetSdkVersion 27
+        versionCode 1
+        versionName "1.0"
     }
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:25.0.0'
-    compile 'com.android.support:design:25.0.0'
-//    compile 'am.util:printer:2.0.0'
-    compile project(':printer')
-    compile 'com.google.zxing:core:3.3.0'
+    implementation 'com.android.support:appcompat-v7:27.0.0'
+    implementation 'com.android.support:recyclerview-v7:27.0.0'
+    implementation 'am.util:printer:2.1.0'
+    implementation 'com.google.zxing:core:3.3.0'
 }

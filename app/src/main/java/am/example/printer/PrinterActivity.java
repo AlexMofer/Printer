@@ -11,7 +11,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.RadioGroup;
@@ -25,7 +28,7 @@ import am.util.printer.PrinterWriter;
 import am.util.printer.PrinterWriter58mm;
 import am.util.printer.PrinterWriter80mm;
 
-public class PrinterActivity extends BaseActivity implements
+public class PrinterActivity extends AppCompatActivity implements
         RadioGroup.OnCheckedChangeListener, SeekBar.OnSeekBarChangeListener, View.OnClickListener {
 
     private static final String FRAGMENT_IP = "ip";
@@ -71,18 +74,26 @@ public class PrinterActivity extends BaseActivity implements
     };
 
     @Override
-    protected int getContentViewLayoutResources() {
-        return R.layout.activity_printer;
-    }
-
-    @Override
-    @SuppressWarnings("all")
-    protected void initResource(Bundle savedInstanceState) {
-        setSupportActionBar(R.id.printer_toolbar);
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_printer);
+        Toolbar mToolbar = findViewById(R.id.printer_toolbar);
+        if (mToolbar != null) {
+            setSupportActionBar(mToolbar);
+            mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    onBackPressed();
+                }
+            });
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+            }
+        }
         findViewById(R.id.printer_btn_test_ip).setOnClickListener(me);
         findViewById(R.id.printer_btn_test_bluetooth).setOnClickListener(me);
-        edtWidth = (EditText) findViewById(R.id.printer_edt_width);
-        edtQRCode = (EditText) findViewById(R.id.printer_edt_code);
+        edtWidth = findViewById(R.id.printer_edt_width);
+        edtQRCode = findViewById(R.id.printer_edt_code);
         ((RadioGroup) findViewById(R.id.printer_rg_type)).setOnCheckedChangeListener(me);
         ((SeekBar) findViewById(R.id.printer_sb_height)).setOnSeekBarChangeListener(me);
         IntentFilter intentFilter = new IntentFilter();
@@ -265,9 +276,5 @@ public class PrinterActivity extends BaseActivity implements
         } else {
             super.onBackPressed();
         }
-    }
-
-    public static void startActivity(Context context) {
-        context.startActivity(new Intent(context, PrinterActivity.class));
     }
 }
