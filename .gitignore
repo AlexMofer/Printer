@@ -1,13 +1,9 @@
 # Gradle files
 .gradle/
 build/
-/*/build/
 
 # Local configuration file (sdk path, etc)
 local.properties
-
-# Gradle configuration file
-gradle.properties
 
 # Android Studio
 .idea/
@@ -21,3 +17,12 @@ gradle.properties
 
 # Key
 *.jks
+
+# Secret
+secret.properties
+*.gpg
+*.pgp
+*.asc
+
+# Other
+temp/

@@ -1,19 +1,41 @@
-apply plugin: 'com.android.application'
+plugins {
+    id 'com.android.application'
+}
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion 30
+    buildToolsVersion "30.0.3"
+
     defaultConfig {
-        applicationId "am.example.printer"
-        minSdkVersion 14
-        targetSdkVersion 27
+        applicationId "com.am.printer.ui"
+        minSdkVersion 21
+        targetSdkVersion 30
         versionCode 1
         versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
 dependencies {
-    implementation 'com.android.support:appcompat-v7:27.0.0'
-    implementation 'com.android.support:recyclerview-v7:27.0.0'
-    implementation 'am.util:printer:2.1.0'
-    implementation 'com.google.zxing:core:3.3.0'
+
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'com.google.android.material:material:1.3.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    implementation 'io.github.alexmofer.appcompat:appcompat:1.2.0'
+    implementation project(':printer')
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 }

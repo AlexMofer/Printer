@@ -1,0 +1,118 @@
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+
+final Properties pp = new Properties()
+pp.load(project.file("/pom.properties").newDataInputStream())
+
+final Properties sp = new Properties()
+sp.load(project.file("../secret.properties").newDataInputStream())
+
+afterEvaluate {
+
+    task androidJavadocs(type: Javadoc) {
+        source = android.sourceSets.main.java.source
+        failOnError false
+        options {
+            encoding "UTF-8"
+            charSet 'UTF-8'
+            version android.defaultConfig.versionName
+            title pp.getProperty("POM_NAME")
+        }
+    }
+
+    task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+        archiveClassifier.set("javadoc")
+        from androidJavadocs.destinationDir
+    }
+
+    task androidSourcesJar(type: Jar) {
+        archiveClassifier.set("sources")
+        from android.sourceSets.main.java.source
+    }
+
+    artifacts {
+        archives androidSourcesJar
+        archives androidJavadocsJar
+    }
+
+    artifacts {
+        archives androidSourcesJar, androidJavadocsJar
+    }
+
+    if (JavaVersion.current().isJava8Compatible()) {
+        allprojects {
+            tasks.withType(Javadoc) {
+                options.addStringOption('Xdoclint:none', '-quiet')
+            }
+        }
+    }
+
+    if (JavaVersion.current().isJava9Compatible()) {
+        allprojects {
+            tasks.withType(Javadoc) {
+                options.addBooleanOption('html5', true)
+            }
+        }
+    }
+
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+
+                groupId = pp.getProperty("POM_GROUP_ID")
+                artifactId = pp.getProperty("POM_ARTIFACT_ID")
+                version = android.defaultConfig.versionName
+
+                artifact androidSourcesJar
+                artifact androidJavadocsJar
+
+                pom {
+                    name = pp.getProperty("POM_NAME")
+                    packaging = pp.getProperty("POM_PACKAGING")
+                    description = pp.getProperty("POM_DESCRIPTION")
+                    url = pp.getProperty("POM_URL")
+                    licenses {
+                        license {
+                            name = pp.getProperty("POM_LICENCE_NAME")
+                            url = pp.getProperty("POM_LICENCE_URL")
+                            distribution = pp.getProperty("POM_LICENCE_DIST")
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = pp.getProperty("POM_DEVELOPER_ID")
+                            name = pp.getProperty("POM_DEVELOPER_NAME")
+                            email = pp.getProperty("POM_DEVELOPER_EMAIL")
+                        }
+                    }
+                    scm {
+                        connection = pp.getProperty("POM_SCM_CONNECTION")
+                        developerConnection = pp.getProperty("POM_SCM_DEV_CONNECTION")
+                        url = pp.getProperty("POM_SCM_URL")
+                    }
+                }
+            }
+        }
+        repositories {
+            maven {
+                url = android.defaultConfig.versionName.contains("SNAPSHOT") ?
+                        pp.getProperty("SNAPSHOT_REPOSITORY_URL",
+                                "https://s01.oss.sonatype.org/content/repositories/snapshots/")
+                        :
+                        pp.getProperty("RELEASE_REPOSITORY_URL",
+                                "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+
+                credentials(PasswordCredentials) {
+                    username = sp.getProperty("NEXUS_USERNAME")
+                    password = sp.getProperty("NEXUS_PASSWORD")
+                }
+            }
+        }
+    }
+
+    signing {
+        useGpgCmd()
+        sign publishing.publications
+    }
+}

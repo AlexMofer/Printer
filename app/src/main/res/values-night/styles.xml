@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Base.ThemeOverlay.AppCompat.Light.ActionBar">
+        <item name="colorControlNormal">?android:attr/textColorPrimary</item>
+        <item name="searchViewStyle">@style/Widget.AppCompat.SearchView.ActionBar</item>
+    </style>
+
+    <style name="ThemeOverlay.AppCompat.Light.ActionBar" parent="Base.ThemeOverlay.AppCompat.Light.ActionBar" />
+
+    <style name="ThemeOverlay.MaterialComponents.Light.ActionBar" parent="ThemeOverlay.AppCompat.Light.ActionBar" />
+</resources>
