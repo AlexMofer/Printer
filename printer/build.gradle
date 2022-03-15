@@ -3,13 +3,11 @@ plugins {
 }
 
 android {
-    compileSdkVersion 32
-    buildToolsVersion '32.0.0'
+    compileSdk 32
 
     defaultConfig {
-        //noinspection MinSdkTooLow
-        minSdkVersion 5
-        targetSdkVersion 32
+        minSdk 5
+        targetSdk 32
     }
 
     compileOptions {
