@@ -15,7 +15,7 @@ afterEvaluate {
         options {
             encoding "UTF-8"
             charSet 'UTF-8'
-            version android.defaultConfig.versionName
+            version pp.getProperty("POM_VERSION")
             title pp.getProperty("POM_NAME")
         }
     }
@@ -62,7 +62,7 @@ afterEvaluate {
 
                 groupId = pp.getProperty("POM_GROUP_ID")
                 artifactId = pp.getProperty("POM_ARTIFACT_ID")
-                version = android.defaultConfig.versionName
+                version = pp.getProperty("POM_VERSION")
 
                 artifact androidSourcesJar
                 artifact androidJavadocsJar
@@ -96,7 +96,7 @@ afterEvaluate {
         }
         repositories {
             maven {
-                url = android.defaultConfig.versionName.contains("SNAPSHOT") ?
+                url = pp.getProperty("POM_VERSION").contains("SNAPSHOT") ?
                         pp.getProperty("SNAPSHOT_REPOSITORY_URL",
                                 "https://s01.oss.sonatype.org/content/repositories/snapshots/")
                         :
